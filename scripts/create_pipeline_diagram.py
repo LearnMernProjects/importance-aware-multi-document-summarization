@@ -81,7 +81,7 @@ ax.text(x2 + box_width/2, y_center - 0.35, '(Temporal + Category\n+ Semantic Sim
         ha='center', va='center', fontsize=8, style='italic')
 
 # ============================================================
-# BLOCK 3: ARTICLE ENCODING
+# BLOCK 3: ARTICLE ENCODING 
 # ============================================================
 x3 = 3.7
 box3 = FancyBboxPatch(
