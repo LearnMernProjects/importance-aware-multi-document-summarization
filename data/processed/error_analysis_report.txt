@@ -1,0 +1,223 @@
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║                   ERROR ANALYSIS REPORT: BASELINE vs AIMS                                 ║
+║                     Multi-Document News Summarization                                     ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+EXECUTIVE SUMMARY
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+The error analysis evaluates two multi-document summarization approaches:
+  • BASELINE: Standard content selection method
+  • AIMS: Importance-aware multi-document summarization (PROPOSED)
+
+Across 25 event clusters covering 12 news categories, measuring three critical error dimensions:
+  1. Redundancy Rate (repeated content)
+  2. Omission Rate (missing important entities)
+  3. Hallucination Rate (fabricated information)
+
+KEY FINDINGS
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+✓ OMISSION RATE: AIMS Shows Clear Advantage
+  ├─ Baseline:  51.35% entities from reference missing in generated summary
+  ├─ AIMS:      47.22% entities from reference missing in generated summary
+  ├─ IMPROVEMENT: +8.04% Better entity coverage
+  ├─ INTERPRETATION: AIMS is better at preserving important named entities from references
+  └─ IMPACT: Higher quality summaries with more comprehensive information
+
+⚠ HALLUCINATION RATE: Baseline Shows Advantage
+  ├─ Baseline:  27.65% of entities are hallucinated (out-of-context)
+  ├─ AIMS:      32.95% of entities are hallucinated (out-of-context)
+  ├─ DIFFERENCE: -19.17% (AIMS has higher hallucination)
+  ├─ INTERPRETATION: AIMS generates more entities, some of which are not in source/reference
+  └─ CONCERN: Requires review - may indicate over-generation or false entity extraction
+
+~ REDUNDANCY RATE: Both Methods Perform Well
+  ├─ Baseline:  0.00% repeated content
+  ├─ AIMS:      0.05% repeated content
+  ├─ DIFFERENCE: Negligible
+  ├─ INTERPRETATION: Neither method produces significantly redundant summaries
+  └─ CONCLUSION: Both are effective at avoiding repetition
+
+CATEGORY-WISE ANALYSIS
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+STRONGEST PERFORMANCE (AIMS Better):
+  1. National News:        Omission improved from 80.00% to 42.50% (-47.5% better)
+  2. Business & Finance:   Omission improved from 64.00% to 52.89% (-11.1% better)
+  3. International News:   Omission improved from 70.63% to 65.48% (-5.15% better)
+
+WEAKEST PERFORMANCE (Baseline Better):
+  1. Politics:             Hallucination increased from 22.29% to 49.64% (+122.5% worse)
+  2. Automotive:           Hallucination increased from 50.00% to 60.00% (+20% worse)
+  3. Health & Wellness:    Hallucination increased from 37.50% to 42.86% (+14.3% worse)
+
+NEUTRAL PERFORMANCE:
+  • Crime & Justice:       Both methods identical (no improvement/degradation)
+  • Weather:               Both methods identical
+  • Education:             Both methods identical
+  • Technology & Gadgets:  Both methods identical
+  • Entertainment:         Both methods identical
+
+
+DETAILED METRIC EXPLANATIONS
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+1. REDUNDANCY RATE
+   Purpose: Measure repeated content within a single summary
+   
+   Methodology:
+   • Extract all 3-grams from the summary text
+   • Count how many 3-grams appear more than once
+   • Calculate sentence-level similarity using TF-IDF cosine distance
+   • Flag sentence pairs with similarity > 0.7 as redundant
+   • Final Score = 60% × (n-gram redundancy) + 40% × (sentence redundancy)
+   
+   Results:
+   • Both methods score nearly 0.0 (excellent)
+   • Indicates both are effective at selecting diverse content
+   • No actionable improvements needed
+
+2. OMISSION RATE
+   Purpose: Measure completeness of information by tracking entity coverage
+   
+   Methodology:
+   • Extract named entities from reference summary using spaCy NER
+   • Extract named entities from generated summary using spaCy NER
+   • Compare: Count entities in reference but NOT in generated
+   • Omission% = (Missing Entities / Total Reference Entities) × 100
+   • Entity Types Tracked: PERSON, ORG, GPE, EVENT, DATE, MONEY, etc.
+   
+   Results:
+   • AIMS: 47.22% average omission rate
+   • Baseline: 51.35% average omission rate
+   • AIMS performs 8.04% better at preserving entities
+   • Particularly strong in National News, Business & Finance categories
+
+3. HALLUCINATION RATE
+   Purpose: Measure factual accuracy by detecting non-existent entities
+   
+   Methodology:
+   • Extract named entities from generated summary using spaCy NER
+   • Build set of valid entities from source + reference documents
+   • Count generated entities NOT in valid set
+   • Hallucination% = (Invalid Entities / Total Generated Entities) × 100
+   • Indicates model making up or confabulating information
+   
+   Results:
+   • AIMS: 32.95% average hallucination rate
+   • Baseline: 27.65% average hallucination rate
+   • AIMS has 19.17% higher hallucination rate
+   • Concerning trend - needs investigation
+
+
+STATISTICAL SUMMARY
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+Dataset Coverage:
+  • Total Event Clusters Analyzed: 25
+  • Summaries Evaluated: 50 (25 × 2 methods)
+  • News Categories: 12
+  • Total Named Entities Analyzed: 847
+
+Distribution Statistics:
+  ┌─ OMISSION RATE
+  │  ├─ Baseline: μ=51.35%, σ=26.3%, min=0%, max=86.7%
+  │  └─ AIMS:     μ=47.22%, σ=25.7%, min=0%, max=80%
+  │
+  ├─ HALLUCINATION RATE
+  │  ├─ Baseline: μ=27.65%, σ=31.2%, min=0%, max=85.7%
+  │  └─ AIMS:     μ=32.95%, σ=29.8%, min=0%, max=85%
+  │
+  └─ REDUNDANCY RATE
+     ├─ Baseline: μ=0.00%, σ=0%, min=0%, max=0%
+     └─ AIMS:     μ=0.05%, σ=0.15%, min=0%, max=1.3%
+
+
+RECOMMENDATIONS
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+1. FOR OMISSION RATE (AIMS Advantage):
+   ✓ LEVERAGE: AIMS' strength in entity preservation
+   ✓ APPLY: To categories where factual completeness is critical
+   ✓ COMBINE: With hallucination filtering for best results
+
+2. FOR HALLUCINATION RATE (Baseline Advantage):
+   ⚠ INVESTIGATE: Why AIMS generates more out-of-context entities
+   ⚠ POSSIBLE CAUSES:
+     • Over-aggressive entity extraction from importance weights
+     • Error in entity validation logic for hallucination detection
+     • spaCy NER identifying different entity types between methods
+   ⚠ SOLUTIONS:
+     • Implement strict entity validation against source documents
+     • Add confidence threshold to entity matching
+     • Perform manual review of hallucinated entities sample
+
+3. FOR REDUNDANCY RATE (Both Excellent):
+   ✓ MAINTAIN: Current approach for both methods
+   ✓ BOTH: Show excellent diversity in content selection
+
+4. OVERALL STRATEGY:
+   ✓ USE AIMS FOR: High-quality, comprehensive summaries
+   ✓ USE BASELINE FOR: Conservative, factual-only summaries
+   ✓ HYBRID APPROACH: Combine both using ensemble method
+     - AIMS for content selection
+     - Baseline validation for hallucination filtering
+
+
+OUTPUT FILES GENERATED
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+1. error_analysis.csv
+   ├─ Content: Detailed metrics for each of 50 summaries
+   ├─ Columns: model, event_cluster_id, category, redundancy_rate, omission_rate, 
+   │           hallucination_rate, num_articles, summary_length
+   └─ Use: Detailed analysis and filtering
+
+2. error_analysis_comparison.csv
+   ├─ Content: Overall comparison metrics
+   ├─ Columns: Metric, Baseline, AIMS, Improvement (%), Better
+   └─ Use: Executive summary and presentations
+
+3. error_analysis_by_category.csv
+   ├─ Content: Breakdown by news category
+   ├─ Columns: Category, Baseline_Redundancy, AIMS_Redundancy, 
+   │           Baseline_Omission, AIMS_Omission, Baseline_Hallucination, AIMS_Hallucination, Sample_Size
+   └─ Use: Category-specific analysis
+
+4. error_analysis_visualization.png
+   ├─ Content: 6-panel comprehensive visualization
+   ├─ Panels: Comparison, Category Heatmap, Distribution, Improvement %, Stats Table, Heatmap
+   └─ Use: Presentations and publications
+
+
+CONCLUSION
+═════════════════════════════════════════════════════════════════════════════════════════════
+
+AIMS demonstrates mixed performance relative to Baseline:
+
+✓ STRENGTHS:
+  • 8.04% better entity coverage (omission rate)
+  • Particularly strong on National News and Business & Finance
+  • Preserves more important information from references
+
+⚠ WEAKNESSES:
+  • 19.17% higher hallucination rate
+  • Generates more non-existent or out-of-context entities
+  • Requires stricter validation in production use
+
+📊 RECOMMENDATION:
+   AIMS is suitable for applications prioritizing comprehensive information,
+   with strong post-processing validation for hallucination detection.
+   
+   For production deployment, consider:
+   1. Implementing entity validation pipeline
+   2. Using confidence scores for entity extraction
+   3. Combining with Baseline's hallucination filtering approach
+   4. Category-specific parameter tuning for Politics/Automotive
+
+
+═════════════════════════════════════════════════════════════════════════════════════════════
+Report Generated: Error Analysis Complete
+═════════════════════════════════════════════════════════════════════════════════════════════
